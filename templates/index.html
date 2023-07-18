@@ -42,12 +42,13 @@
     </form>
 
 
-    {% if final_itinerary %}
+    {% if filename %}
     <div>
         <h2>Your Itinerary</h2>
-        <p>{{final_itinerary}}</p>
+        <a href="{{ url_for('download_pdf', filename=filename) }}">Download your itinerary</a>
     </div>
     {% endif %}
     
 </body>
 </html>
+
