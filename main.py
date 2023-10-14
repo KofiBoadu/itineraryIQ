@@ -1,19 +1,22 @@
-from flask import Flask, render_template, request, send_from_directory,redirect, url_for,abort
+from flask import Flask, render_template, request, send_from_directory,redirect, url_for,abort,session 
 from models.itineraryAI import itineraryAI, generate_prompt, extract_itinerary_details
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 import os 
 from reportlab.lib.units import inch
+import secrets
 import re
 
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/PDF/'
+app.secret_key = secrets.token_hex(16)  
 
 @app.route("/", methods=["GET", "POST"])
 def home_page():
     if request.method == "POST":
+        
         destination = request.form["destination"]
         number_OfStayDays = int(request.form["days"])
         travelers_budget = int(request.form["budget"])
@@ -41,9 +44,16 @@ def home_page():
 
         doc.build(Story)
 
-        return render_template("index.html", filename=filename)
+        # Save the filename in the session so we can retrieve it after redirecting
+        session['filename'] = filename
 
-    return render_template("index.html", filename=None)
+        # Redirect back to the home_page after processing the form
+        return redirect(url_for('home_page'))
+
+    filename = session.pop('filename', None)  # Retrieve the filename from session and remove it
+    return render_template("index.html", filename=filename)
+      
+   
 
 
 
